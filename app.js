@@ -1,3 +1,5 @@
+// Copyright (C) 2026 Aron Sommer. See LICENSE file for full license details.
+
 import { GoogleGenAI, Modality } from "https://cdn.jsdelivr.net/npm/@google/genai@2.27.0/+esm";
 
 const LIVE_MODEL = "gemini-3.8-live";

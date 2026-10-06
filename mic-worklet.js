@@ -1,3 +1,5 @@
+// Copyright (C) 2026 Aron Sommer. See LICENSE file for full license details.
+
 // Posts the microphone signal as 16-bit PCM chunks.
 class Mic extends AudioWorkletProcessor {
   chunk = new Int16Array(2048);
