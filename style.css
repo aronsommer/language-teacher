@@ -1,0 +1,389 @@
+/* One blue and one red, always with white text on them in both themes. */
+:root {
+  color-scheme: light dark;
+  accent-color: var(--accent);
+  --bg: light-dark(#f3f6fb, #131314);
+  --surface: light-dark(#ffffff, #1e1f20);
+  --tonal: light-dark(#dde4ee, #2d2f31);
+  --line: light-dark(#e3e8ef, #3c4043);
+  --text: light-dark(#1f1f1f, #e3e3e3);
+  --text-2: light-dark(#5f6368, #b4b8bc);
+  --accent: #1e90ff;
+  --on-accent: #ffffff;
+  --bad: #dc143c;
+  --on-bad: #ffffff;
+  --bubble-teacher: var(--surface);
+  --bubble-user: light-dark(#dcecff, #1b2c40);
+  --gap-tight: 4px; /* a label and its field, the corner icons */
+  --gap-small: 8px; /* the buttons, the emoji and the title */
+  --gap: 12px; /* the usual one: the header, the settings rows, the messages */
+  --control: 34px; /* the height of buttons and one-line fields */
+  --shadow:
+    0 1px 2px light-dark(rgb(60 64 67 / 0.08), transparent),
+    0 1px 3px light-dark(rgb(60 64 67 / 0.06), transparent);
+  font-family: "Figtree", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  /* No flash over a tapped button or link on touch screens. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* The padding keeps everything out from under the notch and the home bar. */
+body {
+  margin: 0;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* The title and the buttons at the left, the icons at the right. */
+header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: var(--gap);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+h1,
+h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* The emoji beside the words. The padding centres the first line on the corner buttons. */
+h1 {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: start;
+  align-items: center;
+  column-gap: var(--gap-small);
+  padding-block: calc((var(--control) - 1lh) / 2);
+  line-height: 1.1;
+}
+
+/* Narrow: the two words stack beside an emoji twice the size. */
+@media (max-width: 480px) {
+  h1 {
+    grid-template-columns: auto min-content;
+  }
+
+  h1 span {
+    font-size: 2em;
+    line-height: 1;
+  }
+}
+
+a {
+  color: inherit;
+}
+
+#settings {
+  width: 480px;
+  padding: 0;
+  border: 0;
+  border-radius: 28px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+#settings::backdrop {
+  background: rgb(0 0 0 / 0.35);
+}
+
+/* The padding is the form's, so only a click on the backdrop lands on the dialog itself. */
+#settings form {
+  display: grid;
+  gap: var(--gap);
+  padding: 24px;
+}
+
+h2 {
+  text-align: center;
+}
+
+/* The link and the version on two close lines. */
+#settings p {
+  display: grid;
+  justify-items: start;
+  gap: var(--gap-tight);
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-2);
+}
+
+#settings button {
+  justify-self: center;
+}
+
+label {
+  display: grid;
+  gap: var(--gap-tight);
+  font-size: 0.75rem;
+  color: var(--text-2);
+}
+
+/* The key's label at the left, the link to get one at the right. */
+label span {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--gap);
+}
+
+label.check {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+/* One height, so a row is equally tall whichever controls it holds. */
+#key,
+select,
+button {
+  height: var(--control);
+}
+
+/* Masked like a password field, without being one for password managers. */
+#key {
+  -webkit-text-security: disc;
+}
+
+/* Empty: the placeholder is a single space. */
+#key:placeholder-shown {
+  border-color: var(--bad);
+}
+
+#key,
+select,
+#notes {
+  width: 100%;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+#notes {
+  height: 8lh;
+  padding-block: 8px;
+  resize: vertical;
+}
+
+button {
+  padding: 0 20px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* The checkbox wraps below the buttons when the row is too narrow. */
+.buttons {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap-small);
+}
+
+/* Without a key, the button that adds one shows in place of these. */
+.no-key .buttons,
+.no-key #status,
+body:not(.no-key) #addKey {
+  display: none;
+}
+
+button.bad {
+  background: var(--bad);
+  color: var(--on-bad);
+}
+
+/* Start and Stop share one cell, so the button is as wide as the wider of the two in both states. */
+#toggle {
+  display: inline-grid;
+  place-items: center;
+}
+
+#toggle span {
+  grid-area: 1 / 1;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-tight);
+}
+
+#toggle:not(.bad) span:last-child,
+#toggle.bad span:first-child {
+  visibility: hidden;
+}
+
+/* A microphone before Start, a crossed-out one before Stop. Screen readers skip them. */
+#toggle span::before {
+  content: "mic" / "";
+  font-family: "Material Symbols Outlined";
+  font-size: 20px;
+  font-weight: 400;
+}
+
+#toggle span:last-child::before {
+  content: "mic_off" / "";
+}
+
+button.plain {
+  background: var(--tonal);
+  color: inherit;
+  font-weight: 500;
+}
+
+.corner {
+  display: flex;
+  gap: var(--gap-tight);
+}
+
+.corner button {
+  width: var(--control);
+  padding: 0;
+  background: none;
+  color: inherit;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+main {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  padding: 16px max(16px, 50% - 340px);
+}
+
+/* The messages lay out as children of main. */
+#log {
+  display: contents;
+}
+
+/* The padding lifts it above the centre of the chat. */
+#intro {
+  display: grid;
+  justify-items: center;
+  gap: var(--gap);
+  max-width: 20rem;
+  margin: auto;
+  padding-bottom: 12dvh;
+  text-align: center;
+  color: var(--text-2);
+}
+
+#hint {
+  margin: 0;
+}
+
+/* With a key, it only shows while the chat has no message and no status. */
+body:not(.no-key):has(#log:not(:empty), #status:not(:empty)) #intro {
+  display: none;
+}
+
+/* The last row of the header. Its line is kept while empty, so the chat never jumps. */
+#status {
+  grid-column: 1 / -1;
+  min-height: 1lh;
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-2);
+}
+
+article {
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: var(--bubble-teacher);
+  box-shadow: var(--shadow);
+}
+
+article.user {
+  background: var(--bubble-user);
+}
+
+article p {
+  margin: 0;
+}
+
+.text,
+.words {
+  font-size: 1.15rem;
+  line-height: 1.4;
+}
+
+.interim {
+  color: var(--text-2);
+}
+
+.natural {
+  margin-top: var(--gap-tight);
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+
+.natural:empty {
+  display: none;
+}
+
+/* The words of all sentences wrap as one list. */
+.words > span {
+  display: contents;
+}
+
+.words {
+  display: none;
+  flex-wrap: wrap;
+  gap: var(--gap-small) var(--gap);
+}
+
+.word {
+  display: grid;
+  justify-items: center;
+}
+
+/* An empty line keeps its height, so the rows of all words line up. */
+.word small {
+  min-height: 1lh;
+  font-size: 0.7rem;
+  color: var(--text-2);
+}
+
+.word-mode .glossed .words {
+  display: flex;
+}
+
+.word-mode .glossed :is(.text, .natural) {
+  display: none;
+}
