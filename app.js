@@ -477,11 +477,13 @@ async function translate(bubble, all = false) {
     bubble.waiting.delete(glossed);
     showWords(bubble);
   } catch (error) {
-    const reason = error.message.includes("RESOURCE_EXHAUSTED")
-      ? "the API key's requests per minute are used up"
-      : error.message;
+    // The SDK's message holds the API's JSON error, behind a prefix when it came mid-stream.
+    let reason = error.message;
+    try {
+      reason = JSON.parse(reason.slice(reason.indexOf("{"))).error.message;
+    } catch {}
     if (!natural.textContent) {
-      natural.textContent = `Translation failed: ${reason}. `;
+      natural.textContent = `Translation failed: ${reason} `;
       // Word mode keeps the line of a failed translation visible.
       natural.className = "failed";
     }

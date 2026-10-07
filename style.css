@@ -353,6 +353,8 @@ article p {
   margin-top: var(--gap-tight);
   font-size: 0.85rem;
   color: var(--text-2);
+  /* The API's quota error ends in a URL wider than a phone's bubble. */
+  overflow-wrap: anywhere;
 }
 
 .natural:empty {
