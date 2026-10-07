@@ -480,7 +480,11 @@ async function translate(bubble, all = false) {
     const reason = error.message.includes("RESOURCE_EXHAUSTED")
       ? "the API key's requests per minute are used up"
       : error.message;
-    natural.textContent ||= `Translation failed: ${reason}. `;
+    if (!natural.textContent) {
+      natural.textContent = `Translation failed: ${reason}. `;
+      // Word mode keeps the line of a failed translation visible.
+      natural.className = "failed";
+    }
   }
   scrollToEnd();
 }

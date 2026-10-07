@@ -386,6 +386,8 @@ article p {
   display: flex;
 }
 
-.word-mode .glossed :is(.text, .natural) {
+/* Word mode hides the translation line unless a translation in it failed. */
+.word-mode .glossed .text,
+.word-mode .natural:not(:has(.failed)) {
   display: none;
 }
