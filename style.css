@@ -351,6 +351,7 @@ article p {
 .natural {
   margin-top: var(--gap-tight);
   font-size: 14px;
+  line-height: 1.2;
   color: var(--text-2);
   /* The API's quota error ends in a URL wider than a phone's bubble. */
   overflow-wrap: anywhere;
@@ -371,15 +372,18 @@ article p {
   gap: var(--gap-small) var(--gap);
 }
 
+/* The meaning below a word is spaced like the translation line below the text. */
 .word {
   display: grid;
   justify-items: center;
+  row-gap: var(--gap-tight);
 }
 
 /* An empty line keeps its height, so the rows of all words line up. */
 .word small {
   min-height: 1lh;
   font-size: 14px;
+  line-height: 1.2;
   color: var(--text-2);
 }
 
