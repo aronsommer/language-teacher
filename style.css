@@ -58,9 +58,9 @@ header {
 h1,
 h2 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 24px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.5px;
 }
 
 /* The emoji beside the words. The padding centres the first line on the corner buttons. */
@@ -81,7 +81,7 @@ h1 {
   }
 
   h1 span {
-    font-size: 2em;
+    font-size: 48px;
     line-height: 1;
   }
 }
@@ -121,7 +121,7 @@ h2 {
   justify-items: start;
   gap: var(--gap-tight);
   margin: 0;
-  font-size: 0.8rem;
+  font-size: 14px;
   color: var(--text-2);
 }
 
@@ -132,7 +132,7 @@ h2 {
 label {
   display: grid;
   gap: var(--gap-tight);
-  font-size: 0.75rem;
+  font-size: 14px;
   color: var(--text-2);
 }
 
@@ -146,7 +146,6 @@ label span {
 label.check {
   display: flex;
   align-items: center;
-  font-size: 0.9rem;
 }
 
 input,
@@ -154,7 +153,7 @@ select,
 textarea,
 button {
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 15px;
 }
 
 /* One height, so a row is equally tall whichever controls it holds. */
@@ -299,7 +298,7 @@ main {
   display: grid;
   justify-items: center;
   gap: var(--gap);
-  max-width: 20rem;
+  max-width: 320px;
   margin: auto;
   padding-bottom: 12dvh;
   text-align: center;
@@ -320,7 +319,7 @@ body:not(.no-key):has(#log:not(:empty), #status:not(:empty)) #intro {
   grid-column: 1 / -1;
   min-height: 1lh;
   margin: 0;
-  font-size: 0.8rem;
+  font-size: 14px;
   color: var(--text-2);
 }
 
@@ -341,7 +340,7 @@ article p {
 
 .text,
 .words {
-  font-size: 1.15rem;
+  font-size: 18px;
   line-height: 1.4;
 }
 
@@ -351,7 +350,7 @@ article p {
 
 .natural {
   margin-top: var(--gap-tight);
-  font-size: 0.85rem;
+  font-size: 14px;
   color: var(--text-2);
   /* The API's quota error ends in a URL wider than a phone's bubble. */
   overflow-wrap: anywhere;
@@ -380,7 +379,7 @@ article p {
 /* An empty line keeps its height, so the rows of all words line up. */
 .word small {
   min-height: 1lh;
-  font-size: 0.7rem;
+  font-size: 14px;
   color: var(--text-2);
 }
 
