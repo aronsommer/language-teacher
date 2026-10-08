@@ -221,22 +221,28 @@ button.bad {
   color: var(--on-bad);
 }
 
-/* Start and Stop share one cell, so the button is as wide as the wider of the two in both states. */
+/* Start/Stop, Clear and Done are equally wide. */
+#toggle,
+button.plain {
+  width: 84px;
+  padding: 0;
+}
+
+/* Left-aligned, so the icon and the label start at the same place in both states. */
 #toggle {
-  display: inline-grid;
-  place-items: center;
+  padding-left: 10px;
 }
 
 #toggle span {
-  grid-area: 1 / 1;
   display: flex;
   align-items: center;
-  gap: var(--gap-tight);
+  gap: 2px;
 }
 
+/* Only the label of the current state shows. */
 #toggle:not(.bad) span:last-child,
 #toggle.bad span:first-child {
-  visibility: hidden;
+  display: none;
 }
 
 /* A microphone before Start, a crossed-out one before Stop. Screen readers skip them. */
