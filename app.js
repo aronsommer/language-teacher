@@ -29,6 +29,8 @@ const wordMode = $("wordMode");
 const toggle = $("toggle");
 const clear = $("clear");
 const log = $("log");
+const said = $("said");
+const main = log.parentElement;
 const status = $("status");
 const hint = $("hint");
 const notes = $("notes");
@@ -46,6 +48,10 @@ let ai, session, micStream, micContext, playContext;
 let nextPlayTime = 0;
 const sources = new Set();
 const open = { user: null, teacher: null };
+// The turn in which the message in the footer was said.
+let turn;
+// Whether the chat scrolls to its end on new text. Scrolling away from the end turns it off.
+let pinned = true;
 // Timers of teacher text that waits for its audio to play.
 const reveals = new Set();
 // Times of the translation requests of the last minute.
@@ -82,6 +88,8 @@ for (const select of [learnSelect, nativeSelect]) {
 wordMode.addEventListener("change", () => {
   store.set("wordByWord", wordMode.checked ? "1" : "");
   applyWordMode();
+  // The bubbles changed their height.
+  scrollToEnd();
 });
 toggle.addEventListener("click", () => (running ? stop() : start()));
 notes.addEventListener("input", () => store.set(notesKey(), notes.value));
@@ -107,9 +115,14 @@ theme.addEventListener("click", () => {
   applyTheme();
 });
 systemDark.addEventListener("change", applyTheme);
+// Within two pixels, as scroll positions are fractional.
+main.addEventListener("scroll", () => {
+  pinned = main.scrollHeight - main.scrollTop - main.clientHeight < 2;
+});
 clear.addEventListener("click", () => {
   stop();
   log.replaceChildren();
+  said.replaceChildren();
   // A session that already ended left its last message standing.
   status.textContent = "";
 });
@@ -148,7 +161,7 @@ function applyLanguages() {
     option.disabled = option.value === learnSelect.value;
   }
   // Lets the browser pick the language's glyphs, e.g. Chinese rather than Japanese forms.
-  log.lang = LANGUAGES[learnSelect.value];
+  log.lang = said.lang = LANGUAGES[learnSelect.value];
   showNotes();
 }
 
@@ -331,7 +344,18 @@ function openBubble(role) {
   if (!open[role]) {
     const node = element("article", role);
     node.append(element("p", "text"), element("p", "words"), element("p", "natural"));
-    log.append(node);
+    // The teacher's message starts a turn, as does the first message of a chat.
+    if (role === "teacher" || !log.lastElementChild) log.append(element("section", ""));
+    if (role === "teacher") {
+      log.lastElementChild.append(node);
+      // Her new message scrolls into view wherever the chat is.
+      pinned = true;
+    } else {
+      // The learner's message before this one leaves the footer for the turn it was said in.
+      turn?.append(...said.children);
+      turn = log.lastElementChild;
+      said.append(node);
+    }
     open[role] = {
       node,
       text: "",
@@ -499,6 +523,5 @@ function element(tag, className, text = "") {
 }
 
 function scrollToEnd() {
-  const main = log.parentElement;
-  main.scrollTop = main.scrollHeight;
+  if (pinned) main.scrollTop = main.scrollHeight;
 }

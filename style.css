@@ -17,8 +17,8 @@
   --bubble-teacher: var(--surface);
   --bubble-user: light-dark(#dcecff, #1b2c40);
   --gap-tight: 4px; /* a label and its field, the corner icons */
-  --gap-small: 8px; /* the buttons, the emoji and the title */
-  --gap: 12px; /* the usual one: the header, the settings rows, the messages */
+  --gap-small: 8px; /* the buttons, the emoji and the title, the bubbles and the lines by them */
+  --gap: 12px; /* the usual one: the header, the settings rows */
   --control: 34px; /* the height of buttons and one-line fields */
   --shadow:
     0 1px 2px light-dark(rgb(60 64 67 / 0.08), transparent),
@@ -51,7 +51,7 @@ header {
   grid-template-columns: 1fr auto;
   align-items: start;
   gap: var(--gap);
-  padding: 12px 16px;
+  padding: var(--gap-small) 16px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -290,13 +290,45 @@ main {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
-  padding: 16px max(16px, 50% - 340px);
+  gap: var(--gap-small);
+  padding: var(--gap-small) max(16px, 50% - 340px);
 }
 
-/* The messages lay out as children of main. */
+/* The turns lay out as children of main. */
 #log {
   display: contents;
+}
+
+/* A turn: the teacher's message and the learner's messages to it that have left the footer. */
+section {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-small);
+}
+
+section:empty {
+  display: none;
+}
+
+/* The last turn fills the chat, so scrolled to the end it starts at the top. */
+section:nth-last-child(1 of :not(:empty)) {
+  min-height: 100%;
+  /* Covers the shadow of the bubble above, which would show below the header. */
+  box-shadow: 0 calc(-1 * var(--gap-small)) var(--bg);
+}
+
+/* The learner's last message, at a fixed height for two rows of words with meanings. */
+footer {
+  height: 133px;
+  overflow-y: auto;
+  padding: var(--gap-small) max(16px, 50% - 340px);
+  border-top: 1px solid var(--line);
+}
+
+/* It only shows once the chat has a message. */
+main:has(#log:empty) + footer {
+  display: none;
 }
 
 /* The padding lifts it above the centre of the chat. */
@@ -330,7 +362,7 @@ body:not(.no-key):has(#log:not(:empty), #status:not(:empty)) #intro {
 }
 
 article {
-  padding: 12px 16px;
+  padding: 8px 16px;
   border-radius: 16px;
   background: var(--bubble-teacher);
   box-shadow: var(--shadow);
