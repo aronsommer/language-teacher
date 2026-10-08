@@ -143,11 +143,6 @@ label span {
   gap: var(--gap);
 }
 
-label.check {
-  display: flex;
-  align-items: center;
-}
-
 input,
 select,
 textarea,
@@ -200,13 +195,35 @@ button {
   cursor: pointer;
 }
 
-/* The checkbox wraps below the buttons when the row is too narrow. */
+/* The buttons and the checkboxes stay in one row. */
 .buttons {
   grid-column: 1 / -1;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: var(--gap-small);
+}
+
+/* The two checkboxes, one above the other, are together as tall as the buttons. */
+.checks {
+  display: grid;
+  grid-auto-rows: 1fr;
+  height: var(--control);
+  white-space: nowrap;
+}
+
+.checks label {
+  display: flex;
+  align-items: center;
+}
+
+.checks input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+}
+
+.checks label:has(:disabled) {
+  opacity: 0.45;
 }
 
 /* Without a key, the button that adds one shows in place of these. */
@@ -427,6 +444,11 @@ article p {
 
 .word-mode .glossed .words {
   display: flex;
+}
+
+/* Without translation, the lines that were translated before hide too. */
+.no-translation .natural {
+  display: none;
 }
 
 /* Word mode hides the translation line unless a translation in it failed. */

@@ -25,6 +25,7 @@ const $ = (id) => document.getElementById(id);
 const keyInput = $("key");
 const learnSelect = $("learnLanguage");
 const nativeSelect = $("nativeLanguage");
+const translationMode = $("translationMode");
 const wordMode = $("wordMode");
 const toggle = $("toggle");
 const clear = $("clear");
@@ -69,8 +70,10 @@ for (const select of [learnSelect, nativeSelect]) {
 learnSelect.value = store.get("learnLanguage") ?? "Polish";
 nativeSelect.value = store.get("nativeLanguage") ?? "German";
 keyInput.value = store.get("apiKey") ?? "";
+// On unless it was turned off.
+translationMode.checked = store.get("translation") !== "";
 wordMode.checked = store.get("wordByWord") === "1";
-applyWordMode();
+applyTranslation();
 applyLanguages();
 applyKey();
 applyTheme();
@@ -85,12 +88,17 @@ for (const select of [learnSelect, nativeSelect]) {
     applyLanguages();
   });
 }
-wordMode.addEventListener("change", () => {
-  store.set("wordByWord", wordMode.checked ? "1" : "");
-  applyWordMode();
-  // The bubbles changed their height.
-  scrollToEnd();
-});
+for (const [box, name] of [
+  [translationMode, "translation"],
+  [wordMode, "wordByWord"],
+]) {
+  box.addEventListener("change", () => {
+    store.set(name, box.checked ? "1" : "");
+    applyTranslation();
+    // Hiding or swapping the translations changes the height of the bubbles.
+    scrollToEnd();
+  });
+}
 toggle.addEventListener("click", () => (running ? stop() : start()));
 notes.addEventListener("input", () => store.set(notesKey(), notes.value));
 for (const button of [openSettings, addKey]) {
@@ -148,8 +156,12 @@ function applyKey() {
     : "Press Start and just speak. Your teacher talks with you.";
 }
 
-function applyWordMode() {
-  document.body.classList.toggle("word-mode", wordMode.checked);
+// Word mode needs translation: without it, its checkbox is locked and it is off.
+function applyTranslation() {
+  const on = translationMode.checked;
+  wordMode.disabled = !on;
+  document.body.classList.toggle("no-translation", !on);
+  document.body.classList.toggle("word-mode", on && wordMode.checked);
 }
 
 // Blocks choosing the same language twice and shows the pair's notes.
@@ -432,6 +444,8 @@ function showWords(bubble) {
 
 // Translates the whole rest of the text with `all`, else only its complete sentences.
 async function translate(bubble, all = false) {
+  // A message that ends while translation is off stays untranslated.
+  if (!translationMode.checked) return;
   const now = Date.now();
   recent = recent.filter((time) => now - time < 60000);
   const rest = bubble.text.slice(bubble.sent);
