@@ -75,7 +75,7 @@ h1 {
 }
 
 /* Narrow: the two words stack beside an emoji twice the size. */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   h1 {
     grid-template-columns: auto min-content;
   }
