@@ -261,7 +261,7 @@ async function start() {
       navigator.mediaDevices
         .getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } })
         .then((stream) => (micStream = stream)),
-      micContext.audioWorklet.addModule("mic-worklet.js?v=__BUILD_TIMESTAMP__"),
+      micContext.audioWorklet.addModule("js/mic-worklet.js?v=__BUILD_TIMESTAMP__"),
       Promise.race([
         ai.live
           .connect({

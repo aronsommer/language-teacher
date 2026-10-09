@@ -24,7 +24,7 @@ jobs:
       - name: Inject build timestamp
         run: |
           BUILD_TIMESTAMP=$(date -u +"%Y%m%d%H%M%S")
-          sed -i "s|__BUILD_TIMESTAMP__|${BUILD_TIMESTAMP}|g" index.html app.js
+          sed -i "s|__BUILD_TIMESTAMP__|${BUILD_TIMESTAMP}|g" index.html js/app.js
           echo "Injected build timestamp: $BUILD_TIMESTAMP"
 
       - name: Upload artifact
