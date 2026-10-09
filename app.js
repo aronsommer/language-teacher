@@ -143,6 +143,8 @@ theme.addEventListener("click", () => {
   applyTheme();
 });
 systemDark.addEventListener("change", applyTheme);
+// From pwa-install.js.
+initPwaInstall();
 document.addEventListener("visibilitychange", keepAwake);
 keepAwake();
 // Within two pixels, as scroll positions are fractional.
@@ -246,6 +248,13 @@ async function start() {
     micContext = new AudioContext({ sampleRate: 16000 });
     playContext = new AudioContext({ sampleRate: 24000 });
     const languageCodes = [LANGUAGES[learnSelect.value], LANGUAGES[nativeSelect.value]];
+    // connect() never settles when the connection ends before its setup is done, e.g. on a
+    // wrong key. This settles then, so the wait below ends.
+    const ended = Promise.withResolvers();
+    const end = (message) => {
+      ended.resolve();
+      if (id === run) stop(message);
+    };
     // The three need nothing of each other, so they run at once. Each lands in its variable
     // as soon as it is done, so stop() finds it.
     const tasks = [
@@ -253,36 +262,38 @@ async function start() {
         .getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } })
         .then((stream) => (micStream = stream)),
       micContext.audioWorklet.addModule("mic-worklet.js?v=__BUILD_TIMESTAMP__"),
-      ai.live
-        .connect({
-          model: LIVE_MODEL,
-          config: {
-            responseModalities: [Modality.AUDIO],
-            systemInstruction: teacherPrompt(
-              learnSelect.value,
-              nativeSelect.value,
-              notes.value.trim(),
-            ),
-            speechConfig: {
-              voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } },
+      Promise.race([
+        ai.live
+          .connect({
+            model: LIVE_MODEL,
+            config: {
+              responseModalities: [Modality.AUDIO],
+              systemInstruction: teacherPrompt(
+                learnSelect.value,
+                nativeSelect.value,
+                notes.value.trim(),
+              ),
+              speechConfig: {
+                voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } },
+              },
+              inputAudioTranscription: { languageCodes },
+              outputAudioTranscription: { languageCodes },
+              // Past 16k tokens the oldest turns are dropped, down to half.
+              contextWindowCompression: {
+                triggerTokens: "16000",
+                slidingWindow: {},
+              },
             },
-            inputAudioTranscription: { languageCodes },
-            outputAudioTranscription: { languageCodes },
-            // Past 16k tokens the oldest turns are dropped, down to half.
-            contextWindowCompression: {
-              triggerTokens: "16000",
-              slidingWindow: {},
+            callbacks: {
+              onmessage: (message) => id === run && onmessage(message),
+              onerror: (event) => end(event.message || "Connection error."),
+              onclose: (event) =>
+                end(`Gemini closed the connection: ${event.reason || "no reason given"}`),
             },
-          },
-          callbacks: {
-            onmessage: (message) => id === run && onmessage(message),
-            onerror: (event) => id === run && stop(event.message || "Connection error."),
-            onclose: (event) =>
-              id === run &&
-              stop(`Gemini closed the connection: ${event.reason || "no reason given"}`),
-          },
-        })
-        .then((s) => (session = s)),
+          })
+          .then((s) => (session = s)),
+        ended.promise,
+      ]),
     ];
     // All of them settle before the first failure is thrown, so stop() below releases the
     // others too.

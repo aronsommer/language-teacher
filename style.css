@@ -16,7 +16,7 @@
   --on-bad: #ffffff;
   --bubble-teacher: var(--surface);
   --bubble-user: light-dark(#dcecff, #1b2c40);
-  --gap-tight: 4px; /* a label and its field, the corner icons */
+  --gap-tight: 4px; /* a label and its field, the corner buttons */
   --gap-small: 8px; /* the buttons, the teacher image and the title, the bubbles and the lines by them */
   --gap: 12px; /* the usual one: the header, the settings rows */
   --control: 34px; /* the height of buttons and one-line fields */
@@ -27,6 +27,8 @@
   -webkit-font-smoothing: antialiased;
   /* No flash over a tapped button or link on touch screens. */
   -webkit-tap-highlight-color: transparent;
+  /* No zoom on a double tap. */
+  touch-action: manipulation;
 }
 
 * {
@@ -63,31 +65,20 @@ h2 {
   letter-spacing: -0.5px;
 }
 
-/* The teacher image beside the words: as tall as the corner buttons, it centres the line on them. */
+/* The two words stack beside the teacher image. */
 h1 {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: auto min-content;
   justify-content: start;
   align-items: center;
   column-gap: var(--gap-small);
   line-height: 1.1;
 }
 
-/* The ratio holds the width until the image has loaded. */
+/* One line taller than the corner icons. The ratio holds the width until the image has loaded. */
 h1 img {
-  height: var(--control);
+  height: calc(var(--control) + 1lh);
   aspect-ratio: 1;
-}
-
-/* Narrow: the two words stack, and the image grows by the second line. */
-@media (max-width: 768px) {
-  h1 {
-    grid-template-columns: auto min-content;
-  }
-
-  h1 img {
-    height: calc(var(--control) + 1lh);
-  }
 }
 
 a {
@@ -284,16 +275,34 @@ button.plain {
   font-weight: 500;
 }
 
+/* The three icons in a row, Install below them. */
 .corner {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, auto);
   gap: var(--gap-tight);
 }
 
-.corner button {
+/* Shifted by the empty space around a drawing, so the last one ends at the right edge. */
+.corner .material-symbols-outlined {
   width: var(--control);
   padding: 0;
   background: none;
   color: inherit;
+  translate: 8px;
+}
+
+/* At the right, and low enough to end above the bottom of the title. Filled with the colour of the
+   icons, its label has the colour of the page. */
+#install-pwa-link {
+  grid-row: 2;
+  grid-column: 1 / -1;
+  justify-self: end;
+  height: 20px;
+  padding: 0 10px;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 13px;
+  font-weight: 500;
 }
 
 button:disabled {
