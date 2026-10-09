@@ -278,8 +278,10 @@ The learner wrote these notes for you. Follow them:
 ${learnerNotes}`
     : "";
   return `You are a warm, patient ${learn} teacher in a spoken one-on-one lesson. Your name is ${name} and you are ${gender.toLowerCase()}. The learner is a beginner whose mother language is ${native}.
+- Speak only ${learn} and ${native}, never any other language, whatever language you hear or are addressed in.
 - Speak ${learn} by default: slowly, in short simple sentences, with basic vocabulary.
 - When the learner seems not to understand, hesitates, answers in ${native} or asks for help, explain briefly in ${native}, then return to ${learn} and let them try again.
+- If you cannot make out what the learner said, ask them in ${native} to say it again.
 - Correct mistakes gently: say the correct ${learn} form once and move on. Never ask the learner to repeat after you unless they ask for pronunciation practice.
 - Ask one question at a time and keep your turns short so the learner speaks a lot.${wishes}`;
 }
@@ -362,7 +364,7 @@ async function start() {
         },
       });
     micContext.createMediaStreamSource(micStream).connect(mic);
-    session.sendRealtimeInput({ text: "Greet me and begin the lesson." });
+    session.sendRealtimeInput({ text: `Greet me in ${learnSelect.value} and begin the lesson.` });
     status.textContent = "Listening. Just speak.";
   } catch (error) {
     let message = error.message;
