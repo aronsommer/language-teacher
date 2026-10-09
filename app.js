@@ -143,6 +143,8 @@ theme.addEventListener("click", () => {
   applyTheme();
 });
 systemDark.addEventListener("change", applyTheme);
+document.addEventListener("visibilitychange", keepAwake);
+keepAwake();
 // Within two pixels, as scroll positions are fractional.
 main.addEventListener("scroll", () => {
   pinned = main.scrollHeight - main.scrollTop - main.clientHeight < 2;
@@ -154,6 +156,12 @@ clear.addEventListener("click", () => {
   // A session that already ended left its last message standing.
   status.textContent = "";
 });
+
+// Keeps the screen on while the page is shown. The browser drops the lock when the tab is
+// hidden, so it is requested again when the tab is shown. Fails silently where unsupported.
+function keepAwake() {
+  if (!document.hidden) navigator.wakeLock?.request("screen").catch(() => {});
+}
 
 // A stored choice wins over the system's theme.
 function isDark() {
