@@ -13,6 +13,12 @@ It uses two models:
 - **`gemini-3.8-live`** (Live API) holds the conversation. One connection stays open for the whole lesson: your microphone audio streams in, and the teacher's voice streams back together with a transcript of both sides.
 - **`gemini-3.5-flash-lite`** translates. Each piece of the transcript goes out as a separate request and comes back as a translation plus the meaning of every word.
 
+## Fonts
+
+- [Figtree](https://fonts.google.com/specimen/Figtree)
+- [Material Symbols](https://fonts.google.com/icons)
+- [Noto Emoji](https://googlefonts.github.io/noto-emoji-files/?emoji=emoji_u1f469_200d_1f3eb)
+
 ## License
 
 Copyright (C) 2026 Aron Sommer.

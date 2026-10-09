@@ -17,7 +17,7 @@
   --bubble-teacher: var(--surface);
   --bubble-user: light-dark(#dcecff, #1b2c40);
   --gap-tight: 4px; /* a label and its field, the corner icons */
-  --gap-small: 8px; /* the buttons, the emoji and the title, the bubbles and the lines by them */
+  --gap-small: 8px; /* the buttons, the teacher image and the title, the bubbles and the lines by them */
   --gap: 12px; /* the usual one: the header, the settings rows */
   --control: 34px; /* the height of buttons and one-line fields */
   --shadow:
@@ -63,26 +63,30 @@ h2 {
   letter-spacing: -0.5px;
 }
 
-/* The emoji beside the words. The padding centres the first line on the corner buttons. */
+/* The teacher image beside the words: as tall as the corner buttons, it centres the line on them. */
 h1 {
   display: grid;
   grid-template-columns: auto auto;
   justify-content: start;
   align-items: center;
   column-gap: var(--gap-small);
-  padding-block: calc((var(--control) - 1lh) / 2);
   line-height: 1.1;
 }
 
-/* Narrow: the two words stack beside an emoji twice the size. */
+/* The ratio holds the width until the image has loaded. */
+h1 img {
+  height: var(--control);
+  aspect-ratio: 1;
+}
+
+/* Narrow: the two words stack, and the image grows by the second line. */
 @media (max-width: 768px) {
   h1 {
     grid-template-columns: auto min-content;
   }
 
-  h1 span {
-    font-size: 48px;
-    line-height: 1;
+  h1 img {
+    height: calc(var(--control) + 1lh);
   }
 }
 
