@@ -40,11 +40,49 @@ const LANGUAGES = {
   Ukrainian: "uk",
   Vietnamese: "vi",
 };
+// Voice name -> style, by gender.
+const VOICES = {
+  Female: {
+    Achernar: "Soft",
+    Aoede: "Breezy",
+    Autonoe: "Bright",
+    Callirrhoe: "Easy-going",
+    Despina: "Smooth",
+    Erinome: "Clear",
+    Gacrux: "Mature",
+    Kore: "Firm",
+    Laomedeia: "Upbeat",
+    Leda: "Youthful",
+    Pulcherrima: "Forward",
+    Sulafat: "Warm",
+    Vindemiatrix: "Gentle",
+    Zephyr: "Bright",
+  },
+  Male: {
+    Achird: "Friendly",
+    Algenib: "Gravelly",
+    Algieba: "Smooth",
+    Alnilam: "Firm",
+    Charon: "Informative",
+    Enceladus: "Breathy",
+    Fenrir: "Excitable",
+    Iapetus: "Clear",
+    Orus: "Firm",
+    Puck: "Upbeat",
+    Rasalgethi: "Informative",
+    Sadachbia: "Lively",
+    Sadaltager: "Knowledgeable",
+    Schedar: "Even",
+    Umbriel: "Easy-going",
+    Zubenelgenubi: "Casual",
+  },
+};
 
 const $ = (id) => document.getElementById(id);
 const keyInput = $("key");
 const learnSelect = $("learnLanguage");
 const nativeSelect = $("nativeLanguage");
+const voiceSelect = $("voice");
 const translationMode = $("translationMode");
 const wordMode = $("wordMode");
 const toggle = $("toggle");
@@ -87,8 +125,17 @@ const store = {
 for (const select of [learnSelect, nativeSelect]) {
   select.append(...Object.keys(LANGUAGES).map((language) => new Option(language)));
 }
+for (const [gender, voices] of Object.entries(VOICES)) {
+  const group = document.createElement("optgroup");
+  group.label = gender;
+  group.append(
+    ...Object.entries(voices).map(([name, style]) => new Option(`${name} (${style})`, name)),
+  );
+  voiceSelect.append(group);
+}
 learnSelect.value = store.get("learnLanguage") ?? "Polish";
 nativeSelect.value = store.get("nativeLanguage") ?? "German";
+voiceSelect.value = store.get("voice") ?? "Kore";
 keyInput.value = store.get("apiKey") ?? "";
 // On unless it was turned off.
 translationMode.checked = store.get("translation") !== "";
@@ -108,6 +155,7 @@ for (const select of [learnSelect, nativeSelect]) {
     applyLanguages();
   });
 }
+voiceSelect.addEventListener("change", () => store.set("voice", voiceSelect.value));
 for (const [box, name] of [
   [translationMode, "translation"],
   [wordMode, "wordByWord"],
@@ -210,7 +258,7 @@ function applyLanguages() {
 function setRunning(value, message) {
   running = value;
   toggle.classList.toggle("bad", value);
-  keyInput.disabled = learnSelect.disabled = nativeSelect.disabled = value;
+  keyInput.disabled = learnSelect.disabled = nativeSelect.disabled = voiceSelect.disabled = value;
   status.textContent = message;
 }
 
@@ -222,14 +270,14 @@ function showNotes() {
   notes.value = store.get(notesKey()) ?? "";
 }
 
-function teacherPrompt(learn, native, learnerNotes) {
+function teacherPrompt(learn, native, name, gender, learnerNotes) {
   const wishes = learnerNotes
     ? `
 
 The learner wrote these notes for you. Follow them:
 ${learnerNotes}`
     : "";
-  return `You are a warm, patient ${learn} teacher in a spoken one-on-one lesson. The learner is a beginner whose mother language is ${native}.
+  return `You are a warm, patient ${learn} teacher in a spoken one-on-one lesson. Your name is ${name} and you are ${gender.toLowerCase()}. The learner is a beginner whose mother language is ${native}.
 - Speak ${learn} by default: slowly, in short simple sentences, with basic vocabulary.
 - When the learner seems not to understand, hesitates, answers in ${native} or asks for help, explain briefly in ${native}, then return to ${learn} and let them try again.
 - Correct mistakes gently: say the correct ${learn} form once and move on. Never ask the learner to repeat after you unless they ask for pronunciation practice.
@@ -271,10 +319,13 @@ async function start() {
               systemInstruction: teacherPrompt(
                 learnSelect.value,
                 nativeSelect.value,
+                voiceSelect.value,
+                // The label of the voice's group.
+                voiceSelect.selectedOptions[0].parentElement.label,
                 notes.value.trim(),
               ),
               speechConfig: {
-                voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } },
+                voiceConfig: { prebuiltVoiceConfig: { voiceName: voiceSelect.value } },
               },
               inputAudioTranscription: { languageCodes },
               outputAudioTranscription: { languageCodes },
