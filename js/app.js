@@ -4,6 +4,8 @@ import { GoogleGenAI, Modality } from "https://cdn.jsdelivr.net/npm/@google/gena
 
 const LIVE_MODEL = "gemini-3.8-live";
 const TEXT_MODEL = "gemini-3.5-flash-lite";
+// A new session is given at most this many characters of the chat.
+const HISTORY_CHARS = 8000;
 // Language name -> BCP-47 code.
 const LANGUAGES = {
   Albanian: "sq",
@@ -364,7 +366,14 @@ async function start() {
         },
       });
     micContext.createMediaStreamSource(micStream).connect(mic);
-    session.sendRealtimeInput({ text: `Greet me in ${learnSelect.value} and begin the lesson.` });
+    // A chat that is still shown goes on.
+    const turns = chatTurns();
+    if (turns.length) session.sendClientContent({ turns, turnComplete: false });
+    session.sendRealtimeInput({
+      text: turns.length
+        ? `Continue our lesson in ${learnSelect.value} where we left off.`
+        : `Greet me in ${learnSelect.value} and begin the lesson.`,
+    });
     status.textContent = "Listening. Just speak.";
   } catch (error) {
     let message = error.message;
@@ -394,6 +403,20 @@ function stop(message = "") {
   dropReveals();
   closeBubble("user");
   closeBubble("teacher");
+}
+
+// The end of the chat as turns for Gemini, in the order it was said: the messages in the
+// footer belong to the turn they were said in.
+function chatTurns() {
+  const turns = [...log.children].flatMap((section) =>
+    [...section.children, ...(section === turn ? said.children : [])].map((node) => ({
+      role: node.classList.contains("user") ? "user" : "model",
+      parts: [{ text: node.firstChild.textContent }],
+    })),
+  );
+  let room = HISTORY_CHARS;
+  const cut = turns.findLastIndex(({ parts }) => (room -= parts[0].text.length) < 0);
+  return turns.slice(cut + 1);
 }
 
 function onmessage({ serverContent: content }) {
