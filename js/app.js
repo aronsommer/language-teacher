@@ -174,9 +174,14 @@ notes.addEventListener("input", () => store.set(notesKey(), notes.value));
 for (const button of [openSettings, addKey]) {
   button.addEventListener("click", () => settings.showModal());
 }
-// A click on the backdrop lands on the dialog itself.
+// A press on the backdrop lands on the dialog itself. A drag that only ends there, like a
+// text selection, also clicks the dialog, so the press has to start on the backdrop.
+let pressedBackdrop = false;
+settings.addEventListener("pointerdown", (event) => {
+  pressedBackdrop = event.target === settings;
+});
 settings.addEventListener("click", (event) => {
-  if (event.target === settings) settings.close();
+  if (pressedBackdrop && event.target === settings) settings.close();
 });
 // Closing hands the focus back to the button that opened it, which can show its focus ring.
 settings.addEventListener("close", () => document.activeElement.blur());
