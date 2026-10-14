@@ -151,12 +151,19 @@ keyInput.addEventListener("input", () => {
   store.set("apiKey", keyInput.value.trim());
   applyKey();
 });
-for (const select of [learnSelect, nativeSelect]) {
+const languageSelects = [learnSelect, nativeSelect];
+// The languages before the latest change.
+let languages = languageSelects.map((select) => select.value);
+languageSelects.forEach((select, i) => {
   select.addEventListener("change", () => {
-    store.set(select.id, select.value);
+    const other = languageSelects[1 - i];
+    // Picking the other select's language swaps the two.
+    if (select.value === other.value) other.value = languages[i];
+    languages = languageSelects.map((select) => select.value);
+    for (const select of languageSelects) store.set(select.id, select.value);
     applyLanguages();
   });
-}
+});
 voiceSelect.addEventListener("change", () => store.set("voice", voiceSelect.value));
 for (const [box, name] of [
   [translationMode, "translation"],
@@ -249,14 +256,8 @@ function applyTranslation() {
   document.body.classList.toggle("word-mode", on && wordMode.checked);
 }
 
-// Blocks choosing the same language twice and shows the pair's notes.
+// Shows the pair's notes.
 function applyLanguages() {
-  for (const option of learnSelect.options) {
-    option.disabled = option.value === nativeSelect.value;
-  }
-  for (const option of nativeSelect.options) {
-    option.disabled = option.value === learnSelect.value;
-  }
   // Lets the browser pick the language's glyphs, e.g. Chinese rather than Japanese forms.
   log.lang = said.lang = LANGUAGES[learnSelect.value];
   showNotes();
