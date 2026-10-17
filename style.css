@@ -441,14 +441,13 @@ body.keyboard {
   padding: 0;
 }
 
-/* The padding lifts it above the centre of the chat. */
+/* At a fixed distance below the header, so the field below in typing mode does not move it. */
 #intro {
   display: grid;
   justify-items: center;
   gap: var(--gap);
   max-width: 320px;
-  margin: auto;
-  padding-bottom: 12dvh;
+  margin: 25dvh auto 0;
   text-align: center;
   color: var(--text-2);
 }
