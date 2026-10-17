@@ -665,7 +665,6 @@ async function translate(bubble, all = false) {
   recent.push(now);
   const learn = learnSelect.value;
   const native = nativeSelect.value;
-  const pinyin = [learn, native].includes("Mandarin");
   // Each request fills its own spans, so the sentences stay in order.
   const [glossed, natural] = [".words", ".natural"].map((p) =>
     bubble.node.querySelector(p).appendChild(element("span", "")),
@@ -677,7 +676,7 @@ async function translate(bubble, all = false) {
       model: TEXT_MODEL,
       contents: text,
       config: {
-        systemInstruction: `The text is from a lesson for a ${native} speaker learning ${learn}. Translate it into natural ${native}; if it is entirely in ${native}, translate it into ${learn} instead. Also list every word of the text in order as [word, meaning] pairs, the meaning being its literal translation into the other of the two languages in that context.${pinyin ? " Write Mandarin words in simplified Chinese characters, even where the text spells them in pinyin. Give every pair a third item: the pinyin with tone marks of its Mandarin side, whether that is the word or the meaning, and an empty string only when neither contains Chinese characters." : ""}`,
+        systemInstruction: `The text is from a lesson for a ${native} speaker learning ${learn}. Translate it into natural ${native}; if it is entirely in ${native}, translate it into ${learn} instead. Also list every word of the text in order as [word, meaning] pairs, the meaning being its literal translation into the other of the two languages in that context.`,
         temperature: 0,
         responseMimeType: "application/json",
         responseJsonSchema: {
@@ -689,8 +688,8 @@ async function translate(bubble, all = false) {
               items: {
                 type: "array",
                 items: { type: "string" },
-                minItems: pinyin ? 3 : 2,
-                maxItems: pinyin ? 3 : 2,
+                minItems: 2,
+                maxItems: 2,
               },
             },
           },
@@ -710,10 +709,8 @@ async function translate(bubble, all = false) {
     }
     const { translation, words } = JSON.parse(json);
     natural.textContent = `${translation} `;
-    for (const [word, gloss, reading] of words) {
+    for (const [word, gloss] of words) {
       const pair = element("span", "word", word);
-      // Pinyin goes above the word, the meaning below.
-      if (pinyin) pair.prepend(element("small", "", reading));
       pair.append(element("small", "", gloss));
       glossed.append(pair);
     }
