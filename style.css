@@ -3,7 +3,6 @@
 /* One blue and one red, always with white text on them in both themes. */
 :root {
   color-scheme: light dark;
-  accent-color: var(--accent);
   --bg: light-dark(#f3f6fb, #131314);
   --surface: light-dark(#ffffff, #1e1f20);
   --tonal: light-dark(#dde4ee, #2d2f31);
@@ -213,10 +212,33 @@ button {
   align-items: center;
 }
 
+/* Drawn here, as browsers may change the accent colour of their own checkboxes. */
 .checks input {
+  appearance: none;
+  display: grid;
+  place-content: center;
   width: 14px;
   height: 14px;
   margin: 0;
+  border: 1px solid var(--text-2);
+  border-radius: 3px;
+  background: var(--surface);
+}
+
+.checks input:checked {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+/* The tick: two sides of a box, turned. */
+.checks input:checked::before {
+  content: "";
+  width: 8px;
+  height: 4px;
+  margin-top: -2px;
+  border: solid var(--on-accent);
+  border-width: 0 0 2px 2px;
+  rotate: -45deg;
 }
 
 .checks label:has(:disabled) {
