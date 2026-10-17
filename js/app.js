@@ -372,7 +372,10 @@ async function start() {
     }
     ai = new GoogleGenAI({ apiKey: keyInput.value.trim() });
     micContext = new AudioContext({ sampleRate: 16000 });
+    // Made on the click, as browsers may only let sound start from one. Held until the
+    // microphone records, below.
     playContext = new AudioContext({ sampleRate: 24000 });
+    playContext.suspend();
     const languageCodes = [LANGUAGES[learnSelect.value], LANGUAGES[nativeSelect.value]];
     // connect() never settles when the connection ends before its setup is done, e.g. on a
     // wrong key. This settles then, so the wait below ends.
@@ -432,16 +435,25 @@ async function start() {
     // arrived since.
     if (!running) return stop();
     const mic = new AudioWorkletNode(micContext, "mic", { numberOfOutputs: 0 });
-    // While typing, the microphone's audio is dropped.
-    mic.port.onmessage = ({ data }) =>
-      isTyping() ||
+    const recording = Promise.withResolvers();
+    mic.port.onmessage = ({ data }) => {
+      recording.resolve();
+      // While typing, the microphone's audio is dropped.
+      if (isTyping()) return;
       session?.sendRealtimeInput({
         audio: {
           data: new Uint8Array(data.buffer).toBase64(),
           mimeType: "audio/pcm;rate=16000",
         },
       });
+    };
     micContext.createMediaStreamSource(micStream).connect(mic);
+    // Systems reroute their sound output once the microphone records, which can cut what
+    // plays, so the output and the lesson only start then, or after 2 s at most.
+    setTimeout(recording.resolve, 2000);
+    await recording.promise;
+    if (!running) return;
+    playContext.resume();
     // A chat that is still shown goes on.
     const turns = chatTurns();
     if (turns.length) session.sendClientContent({ turns, turnComplete: false });
