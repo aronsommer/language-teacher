@@ -26,7 +26,7 @@
       rel="stylesheet"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=dark_mode,fullscreen,fullscreen_exit,light_mode,mic,mic_off,settings&display=block"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=dark_mode,fullscreen,fullscreen_exit,keyboard,light_mode,mic,send,settings&display=block"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="style.css?v=__BUILD_TIMESTAMP__" />
@@ -51,6 +51,11 @@
       <div class="buttons">
         <button id="toggle"><span>Start</span><span>Stop</span></button>
         <button id="clear" class="plain">Clear</button>
+        <!-- Typing mutes the microphone. -->
+        <button id="mode" aria-label="Type instead of speaking" aria-pressed="false">
+          <span class="material-symbols-outlined">mic</span>
+          <span class="material-symbols-outlined">keyboard</span>
+        </button>
         <div class="checks">
           <label>
             <input id="translationMode" type="checkbox" />
@@ -71,7 +76,20 @@
       </div>
       <div id="log"></div>
     </main>
-    <footer id="said"></footer>
+    <footer>
+      <div id="said"></div>
+      <form id="typing">
+        <input
+          id="typed"
+          type="text"
+          placeholder="Type or paste a message"
+          autocomplete="off"
+          enterkeyhint="send"
+          disabled
+        />
+        <button id="send" class="material-symbols-outlined" aria-label="Send" disabled>send</button>
+      </form>
+    </footer>
     <!-- autofocus keeps the focus on the dialog rather than on its first control. -->
     <dialog id="settings" autofocus>
       <form method="dialog">

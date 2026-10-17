@@ -148,6 +148,7 @@ button {
 
 /* One height, so a row is equally tall whichever controls it holds. */
 #key,
+#typed,
 select,
 button {
   height: var(--control);
@@ -164,6 +165,7 @@ button {
 }
 
 #key,
+#typed,
 select,
 #notes {
   width: 100%;
@@ -236,19 +238,8 @@ button.bad {
 /* Start/Stop, Clear and Done are equally wide. */
 #toggle,
 button.plain {
-  width: 84px;
+  width: 64px;
   padding: 0;
-}
-
-/* Left-aligned, so the icon and the label start at the same place in both states. */
-#toggle {
-  padding-left: 10px;
-}
-
-#toggle span {
-  display: flex;
-  align-items: center;
-  gap: 2px;
 }
 
 /* Only the label of the current state shows. */
@@ -257,16 +248,26 @@ button.plain {
   display: none;
 }
 
-/* A microphone before Start, a crossed-out one before Stop. Screen readers skip them. */
-#toggle span::before {
-  content: "mic" / "";
-  font-family: "Material Symbols Outlined";
-  font-size: 20px;
-  font-weight: 400;
+/* The microphone and the keyboard side by side, the one in use filled. */
+#mode {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--tonal);
+  color: inherit;
 }
 
-#toggle span:last-child::before {
-  content: "mic_off" / "";
+#mode span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  border-radius: 999px;
+}
+
+body:not(.typing) #mode span:first-child,
+.typing #mode span:last-child {
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 button.plain {
@@ -348,17 +349,74 @@ section:nth-last-child(1 of :not(:empty)) {
   box-shadow: 0 calc(-1 * var(--gap-small)) var(--bg);
 }
 
-/* The learner's last message, at a fixed height for two rows of words with meanings. */
+/* The learner's last message, at a fixed height for two rows of words with meanings. While
+   typing, the field takes part of the height, so the footer is as tall in both modes. */
 footer {
+  display: flex;
+  flex-direction: column;
   height: 133px;
-  overflow-y: auto;
-  padding: var(--gap-small) max(16px, 50% - 340px);
   border-top: 1px solid var(--line);
 }
 
-/* It only shows once the chat has a message. */
-main:has(#log:empty) + footer {
+#said {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--gap-small) max(16px, 50% - 340px);
+}
+
+/* The message only shows once the chat has one, the footer only then or while typing. */
+main:has(#log:empty) + footer #said,
+body:not(.typing) main:has(#log:empty) + footer,
+body:not(.typing) #typing {
   display: none;
+}
+
+/* While typing, the message sits just above the field. */
+.typing #said {
+  display: flex;
+  flex-direction: column;
+}
+
+.typing #said > :first-child {
+  margin-top: auto;
+}
+
+/* The field takes the row, the button stays round. */
+#typing {
+  display: flex;
+  gap: var(--gap-small);
+  padding: 0 max(16px, 50% - 340px) var(--gap-small);
+}
+
+/* Without the message, the footer is only the field, which then keeps its own gap above. */
+main:has(#log:empty) + footer {
+  height: auto;
+}
+
+main:has(#log:empty) + footer #typing {
+  padding-top: var(--gap-small);
+}
+
+/* Above an on-screen keyboard there is little room, so the header goes. */
+.keyboard header {
+  display: none;
+}
+
+/* The keyboard covers the home bar. */
+body.keyboard {
+  padding-bottom: 0;
+}
+
+/* Scrolling past their ends does not move the page under the keyboard. */
+.keyboard main,
+.keyboard #said {
+  overscroll-behavior: contain;
+}
+
+#send {
+  flex: none;
+  width: var(--control);
+  padding: 0;
 }
 
 /* The padding lifts it above the centre of the chat. */

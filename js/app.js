@@ -89,6 +89,10 @@ const translationMode = $("translationMode");
 const wordMode = $("wordMode");
 const toggle = $("toggle");
 const clear = $("clear");
+const mode = $("mode");
+const typing = $("typing");
+const typed = $("typed");
+const send = $("send");
 const log = $("log");
 const said = $("said");
 const main = log.parentElement;
@@ -146,6 +150,7 @@ applyTranslation();
 applyLanguages();
 applyKey();
 applyTheme();
+applyMode();
 
 keyInput.addEventListener("input", () => {
   store.set("apiKey", keyInput.value.trim());
@@ -177,6 +182,43 @@ for (const [box, name] of [
   });
 }
 toggle.addEventListener("click", () => (running ? stop() : start()));
+mode.addEventListener("click", () => {
+  store.set("typing", isTyping() ? "" : "1");
+  applyMode();
+  // The rest only applies to a connected session.
+  if (typed.disabled) return;
+  status.textContent = readyStatus();
+  if (isTyping()) {
+    // The server stops waiting for the rest of speech it heard begin.
+    session.sendRealtimeInput({ audioStreamEnd: true });
+    typed.focus();
+  }
+});
+typing.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const text = typed.value.trim();
+  if (!text) return;
+  typed.value = "";
+  // Its own message after any spoken one, shown and translated like it.
+  closeBubble("user");
+  appendText("user", text);
+  closeBubble("user");
+  session.sendRealtimeInput({ text });
+});
+// Keeps the focus, and with it the keyboard, in the field.
+send.addEventListener("mousedown", (event) => event.preventDefault());
+for (const event of ["resize", "scroll"]) visualViewport.addEventListener(event, fitKeyboard);
+typed.addEventListener("blur", fitKeyboard);
+// With the keyboard open, a swipe only scrolls the chat or the message, never the page.
+document.addEventListener(
+  "touchmove",
+  (event) => {
+    if (!document.body.classList.contains("keyboard")) return;
+    const area = event.target.closest("main, #said");
+    if (!area || area.scrollHeight <= area.clientHeight) event.preventDefault();
+  },
+  { passive: false },
+);
 notes.addEventListener("input", () => store.set(notesKey(), notes.value));
 for (const button of [openSettings, addKey]) {
   button.addEventListener("click", () => settings.showModal());
@@ -227,6 +269,19 @@ function keepAwake() {
   if (!document.hidden) navigator.wakeLock?.request("screen").catch(() => {});
 }
 
+// An on-screen keyboard covers the page without shrinking it, and the browser scrolls the page
+// to show the field. While it is open for the field, the page fits above it and stays at the top.
+function fitKeyboard() {
+  // Times the zoom, so zooming in is not taken for a keyboard.
+  const visible = visualViewport.height * visualViewport.scale;
+  // A keyboard takes far more than the browser's bars.
+  const open =
+    document.activeElement === typed && document.documentElement.clientHeight - visible > 150;
+  document.body.classList.toggle("keyboard", open);
+  document.body.style.height = open ? `${visible}px` : "";
+  if (open) scrollTo(0, 0);
+}
+
 // A stored choice wins over the system's theme.
 function isDark() {
   const stored = store.get("theme");
@@ -237,6 +292,19 @@ function isDark() {
 function applyTheme() {
   document.documentElement.style.colorScheme = store.get("theme") ?? "";
   theme.textContent = isDark() ? "light_mode" : "dark_mode";
+}
+
+function isTyping() {
+  return document.body.classList.contains("typing");
+}
+
+function applyMode() {
+  document.body.classList.toggle("typing", store.get("typing") === "1");
+  mode.ariaPressed = isTyping();
+}
+
+function readyStatus() {
+  return isTyping() ? "Connected. Type below." : "Listening. Just speak.";
 }
 
 // Without a key, the stylesheet swaps Start and Clear for a button that opens the settings.
@@ -364,7 +432,9 @@ async function start() {
     // arrived since.
     if (!running) return stop();
     const mic = new AudioWorkletNode(micContext, "mic", { numberOfOutputs: 0 });
+    // While typing, the microphone's audio is dropped.
     mic.port.onmessage = ({ data }) =>
+      isTyping() ||
       session?.sendRealtimeInput({
         audio: {
           data: new Uint8Array(data.buffer).toBase64(),
@@ -380,7 +450,8 @@ async function start() {
         ? `Continue our lesson in ${learnSelect.value} where we left off.`
         : `Greet me in ${learnSelect.value} and begin the lesson.`,
     });
-    status.textContent = "Listening. Just speak.";
+    status.textContent = readyStatus();
+    typed.disabled = send.disabled = false;
   } catch (error) {
     let message = error.message;
     // NotAllowedError only comes from the microphone request.
@@ -399,6 +470,7 @@ async function start() {
 // Also releases when already stopped, for a start that was stopped while it waited.
 function stop(message = "") {
   if (running) setRunning(false, message);
+  typed.disabled = send.disabled = true;
   session?.close();
   micStream?.getTracks().forEach((track) => track.stop());
   micContext?.close();
